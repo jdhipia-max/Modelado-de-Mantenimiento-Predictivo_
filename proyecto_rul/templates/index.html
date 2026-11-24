@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">                                         <!-- acentos y ñ -->
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- se ve bien en celular -->
+  <title>RUL · Ley de Paris</title>
+  <link rel="stylesheet" href="/static/style.css">               <!-- estilos -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script> <!-- librería de gráficas -->
+</head>
+<body>
+
+<!-- ===== Encabezado ===== -->
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Ecuaciones Diferenciales · Proyecto de Aula</p>
+    <h1>Mantenimiento predictivo con la Ley de Paris</h1>
+    <p class="sub">Estimación de la vida útil remanente (RUL) resolviendo
+      <span class="eq">da/dN = β·a<sup>m/2</sup></span> por variables separables</p>
+  </div>
+  <!-- Pestañas de navegación -->
+  <nav class="wrap tabs">
+    <button class="tab activa" data-tab="modelo">Modelo</button>
+    <button class="tab" data-tab="real">Problema real</button>
+    <button class="tab" data-tab="sens">Sensibilidad</button>
+    <button class="tab" data-tab="ejer">Ejercicio Torricelli</button>
+    <button class="tab" data-tab="ai4i">Umbrales AI4I</button>
+  </nav>
+</header>
+
+<main class="wrap">
+
+  <!-- ===== Pestaña 1: teoría resumida ===== -->
+  <section id="modelo" class="panel visible">
+    <div class="grid2">
+      <div class="card">
+        <h2>1. La EDO del fenómeno</h2>
+        <p>La Ley de Paris dice que la grieta crece por ciclo según el rango del factor de intensidad de tensiones:</p>
+        <div class="formula">da/dN = D·(ΔK)<sup>m</sup>, &nbsp; ΔK = 2σ√(παa)</div>
+        <p>Agrupando constantes se obtiene un PVI autónomo y separable:</p>
+        <div class="formula">da/dN = β·a<sup>m/2</sup>, &nbsp; a(0) = a₀<br>β = D·(2σ√(πα))<sup>m</sup></div>
+      </div>
+      <div class="card">
+        <h2>2. Solución por variables separables</h2>
+        <p>Separando: a<sup>−m/2</sup> da = β dN e integrando:</p>
+        <div class="formula">a(N) = [a₀<sup>1−m/2</sup> + (1−m/2)·β·N]<sup>2/(2−m)</sup></div>
+        <p>Con el tamaño crítico de falla (K<sub>máx</sub> = K<sub>Ic</sub>):</p>
+        <div class="formula">a<sub>f</sub> = (K<sub>Ic</sub>/2σ)² / (πα)</div>
+        <div class="formula">N<sub>f</sub> = [a<sub>f</sub><sup>1−m/2</sup> − a₀<sup>1−m/2</sup>] / [(1−m/2)·β]</div>
+      </div>
+      <div class="card">
+        <h2>3. Existencia y unicidad</h2>
+        <p>Por Picard–Lindelöf: ∂f/∂a = (mβ/2)·a<sup>m/2−1</sup> es continua para a &gt; 0, así que con a₀ &gt; 0 la solución es única.</p>
+      </div>
+      <div class="card">
+        <h2>4. Vida útil remanente</h2>
+        <p>RUL(N) = N<sub>f</sub> − N. Con m &gt; 2 el crecimiento es autocatalítico: la grieta es casi invisible la mayor parte de la vida y se acelera al final.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Pestaña 2: calculadora del problema real ===== -->
+  <section id="real" class="panel">
+    <div class="layout">
+      <!-- Formulario con los parámetros de la Tabla 1 -->
+      <form id="formParis" class="card form">
+        <h2>Parámetros (Tabla 1)</h2>
+        <label>D – constante de Paris <input name="D" value="6.89e-12"></label>
+        <label>m – exponente <input name="m" value="3" type="number" step="0.1"></label>
+        <label>σ – amplitud de esfuerzo (MPa) <input name="sigma" value="100" type="number"></label>
+        <label>α – factor geométrico <input name="alpha" value="1.25" type="number" step="0.01"></label>
+        <label>K<sub>Ic</sub> – tenacidad (MPa√m) <input name="KIc" value="50" type="number"></label>
+        <label>a₀ – defecto inicial (mm) <input name="a0" value="0.5" type="number" step="0.01"></label>
+        <label>Grieta detectable en inspección (mm) <input name="a_det" value="5" type="number" step="0.1"></label>
+        <button type="submit">Calcular RUL</button>
+      </form>
+
+      <!-- Resultados -->
+      <div class="resultados">
+        <div class="kpis">
+          <div class="kpi"><span>β</span><b id="kBeta">–</b><small>m<sup>−1/2</sup>/ciclo</small></div>
+          <div class="kpi"><span>Tamaño crítico a<sub>f</sub></span><b id="kAf">–</b><small>mm</small></div>
+          <div class="kpi destacado"><span>Vida total N<sub>f</sub> (RUL)</span><b id="kNf">–</b><small>ciclos</small></div>
+          <div class="kpi"><span>Explosión N*</span><b id="kNexp">–</b><small>ciclos</small></div>
+        </div>
+        <p id="msgInsp" class="aviso"></p>
+
+        <div class="card"><h2>Crecimiento de la grieta a(N)</h2><canvas id="gCurva"></canvas></div>
+        <div class="card"><h2>Campo de direcciones da/dN = β·a<sup>m/2</sup></h2><canvas id="gCampo"></canvas></div>
+
+        <div class="card">
+          <h2>Comprobación: analítica vs numérica (RK4)</h2>
+          <table><thead><tr><th>N (ciclos)</th><th>a analítica (mm)</th><th>a numérica (mm)</th><th>Error relativo</th></tr></thead>
+            <tbody id="tParis"></tbody></table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Pestaña 3: sensibilidad (Tablas 5 y 6) ===== -->
+  <section id="sens" class="panel">
+    <p class="nota">Usa los parámetros de la pestaña «Problema real». Cámbialos allí y vuelve aquí.</p>
+    <div class="grid2">
+      <div class="card"><h2>RUL vs esfuerzo σ (log–log)</h2><canvas id="gSigma"></canvas>
+        <table><thead><tr><th>σ (MPa)</th><th>β</th><th>a<sub>f</sub> (mm)</th><th>N<sub>f</sub></th></tr></thead><tbody id="tSigma"></tbody></table></div>
+      <div class="card"><h2>RUL vs defecto inicial a₀</h2><canvas id="gA0"></canvas>
+        <table><thead><tr><th>a₀ (mm)</th><th>N<sub>f</sub></th><th>Relativo</th></tr></thead><tbody id="tA0"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ===== Pestaña 4: ejercicio a lápiz y papel ===== -->
+  <section id="ejer" class="panel">
+    <div class="layout">
+      <form id="formTorr" class="card form">
+        <h2>dh/dt = −k√h</h2>
+        <p class="nota">Tanque de refrigerante de una fresadora CNC.</p>
+        <label>k (cm<sup>1/2</sup>/min) <input name="k" value="0.5" type="number" step="0.05"></label>
+        <label>h₀ – nivel inicial (cm) <input name="h0" value="16" type="number"></label>
+        <button type="submit">Resolver</button>
+        <div class="formula pequeña">h(t) = (√h₀ − k·t/2)²</div>
+      </form>
+      <div class="resultados">
+        <div class="kpis"><div class="kpi destacado"><span>Tiempo de vaciado</span><b id="kVacio">–</b><small>min</small></div></div>
+        <div class="card"><h2>Nivel del tanque h(t)</h2><canvas id="gTorr"></canvas></div>
+        <div class="card"><table><thead><tr><th>t (min)</th><th>h analítica</th><th>h numérica</th><th>Error</th></tr></thead><tbody id="tTorr"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Pestaña 5: umbrales de falla AI4I 2020 ===== -->
+  <section id="ai4i" class="panel">
+    <div class="layout">
+      <form id="formAi4i" class="card form">
+        <h2>Lectura de sensores (fresadora CNC)</h2>
+        <label>Temperatura del aire (K) <input name="T_aire" value="298.1" type="number" step="0.1"></label>
+        <label>Temperatura de proceso (K) <input name="T_proc" value="308.6" type="number" step="0.1"></label>
+        <label>Velocidad (rpm) <input name="rpm" value="1551" type="number"></label>
+        <label>Par (Nm) <input name="par" value="42.8" type="number" step="0.1"></label>
+        <label>Desgaste de herramienta (min) <input name="desgaste" value="0" type="number"></label>
+        <label>Calidad
+          <select name="calidad"><option>L</option><option selected>M</option><option>H</option></select></label>
+        <button type="submit">Diagnosticar</button>
+      </form>
+      <div class="resultados">
+        <div id="estadoAi4i" class="estado">–</div>
+        <div id="listaFallas" class="fallas"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="wrap">Institución Universitaria Colegio Mayor del Cauca · Ingeniería de Sistemas · 2026</footer>
+
+<script src="/static/app.js"></script>  <!-- lógica de la página -->
+</body>
+</html>

@@ -1,0 +1,92 @@
+/* ===== Colores y tipografía generales ===== */
+:root {
+  --azul: #1f4e79;        /* color principal */
+  --azul-claro: #e8f0f8;  /* fondos suaves */
+  --rojo: #c0504d;        /* alertas / falla */
+  --verde: #2e8b57;       /* estado OK */
+  --texto: #1d2733;
+  --gris: #6b7684;
+  --borde: #e3e8ee;
+  --fondo: #f5f7fa;
+}
+* { box-sizing: border-box; }                       /* medidas más fáciles */
+body { margin: 0; font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+       color: var(--texto); background: var(--fondo); line-height: 1.5; }
+.wrap { max-width: 1150px; margin: 0 auto; padding: 0 20px; }  /* ancho máximo centrado */
+
+/* ===== Encabezado ===== */
+header { background: linear-gradient(135deg, #16385a, var(--azul)); color: #fff; padding-top: 32px; }
+.eyebrow { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; opacity: .75; margin: 0; }
+h1 { margin: 6px 0; font-size: clamp(24px, 4vw, 34px); }
+.sub { margin: 0 0 20px; opacity: .85; }
+.eq { font-family: "Cambria Math", Georgia, serif; background: rgba(255,255,255,.12);
+      padding: 2px 8px; border-radius: 6px; }
+
+/* ===== Pestañas ===== */
+.tabs { display: flex; gap: 4px; overflow-x: auto; }
+.tab { background: none; border: 0; color: #cfe0f0; padding: 12px 16px; cursor: pointer;
+       font-size: 15px; border-radius: 8px 8px 0 0; white-space: nowrap; }
+.tab:hover { color: #fff; }
+.tab.activa { background: var(--fondo); color: var(--azul); font-weight: 600; }
+
+/* ===== Paneles (solo se ve el activo) ===== */
+main.wrap { padding-top: 24px; padding-bottom: 24px; }
+.panel { display: none; }
+.panel.visible { display: block; }
+
+/* ===== Tarjetas ===== */
+.card { background: #fff; border: 1px solid var(--borde); border-radius: 12px;
+        padding: 20px; margin-bottom: 18px; }
+.card h2 { font-size: 17px; margin: 0 0 12px; color: var(--azul); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+.grid2 .card { margin-bottom: 0; }
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 800px) { .layout { grid-template-columns: 1fr; } }  /* en celular, una columna */
+
+/* ===== Fórmulas ===== */
+.formula { font-family: "Cambria Math", Georgia, serif; font-size: 17px; background: var(--azul-claro);
+           border-left: 4px solid var(--azul); padding: 10px 14px; border-radius: 6px; margin: 10px 0; }
+.formula.pequeña { font-size: 15px; margin-top: 16px; }
+
+/* ===== Formularios ===== */
+.form { position: sticky; top: 12px; }
+.form label { display: block; font-size: 13px; color: var(--gris); margin-bottom: 10px; }
+.form input, .form select { display: block; width: 100%; margin-top: 4px; padding: 8px 10px;
+       font-size: 15px; border: 1px solid var(--borde); border-radius: 8px; color: var(--texto); }
+.form input:focus { outline: 2px solid var(--azul-claro); border-color: var(--azul); }
+button[type=submit] { width: 100%; margin-top: 8px; padding: 11px; background: var(--azul); color: #fff;
+       border: 0; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+button[type=submit]:hover { background: #16385a; }
+
+/* ===== Indicadores (KPIs) ===== */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.kpi { background: #fff; border: 1px solid var(--borde); border-radius: 12px; padding: 14px 16px; }
+.kpi span { display: block; font-size: 12px; color: var(--gris); }
+.kpi b { display: block; font-size: 24px; margin: 2px 0; }
+.kpi small { color: var(--gris); }
+.kpi.destacado { background: var(--azul); color: #fff; border-color: var(--azul); }
+.kpi.destacado span, .kpi.destacado small { color: #cfe0f0; }
+
+/* ===== Mensajes ===== */
+.aviso { background: #fff7e6; border: 1px solid #f3d9a4; padding: 10px 14px; border-radius: 8px; }
+.aviso:empty { display: none; }   /* si no hay texto, no se muestra */
+.nota { color: var(--gris); font-size: 14px; }
+
+/* ===== Tablas ===== */
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+th { text-align: right; color: var(--gris); font-weight: 600; border-bottom: 2px solid var(--borde); padding: 6px 8px; }
+td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--borde); font-variant-numeric: tabular-nums; }
+
+/* ===== Diagnóstico AI4I ===== */
+.estado { font-size: 20px; font-weight: 700; padding: 16px 20px; border-radius: 12px; margin-bottom: 14px;
+          background: #fff; border: 1px solid var(--borde); }
+.estado.ok { background: #e9f6ee; color: var(--verde); border-color: #bfe3cc; }
+.estado.mal { background: #fbecec; color: var(--rojo); border-color: #efc4c3; }
+.fallas { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.falla { background: #fff; border: 1px solid var(--borde); border-left: 5px solid var(--verde);
+         border-radius: 10px; padding: 14px 16px; }
+.falla.si { border-left-color: var(--rojo); }
+.falla h3 { margin: 0 0 6px; font-size: 15px; }
+.falla p { margin: 2px 0; font-size: 14px; color: var(--gris); }
+
+footer { color: var(--gris); font-size: 13px; padding-bottom: 30px; }
